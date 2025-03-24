@@ -19,7 +19,6 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.ref }}
           path: gpac_public
 
       - name: Retrieve dependencies
@@ -31,11 +30,11 @@ jobs:
         shell: bash
         run: |
           make distclean && ./configure --static-bin && make -j$(nproc)
-          mkdir -p /binaries
-          cp -vf bin/gcc/* /binaries/ || true
+          mkdir -p /mp4box
+          cp -vf bin/gcc/MP4Box /mp4box/ || true
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.ref }}-binaries
-          path: /binaries/
+          name: mp4box
+          path: /mp4box/
