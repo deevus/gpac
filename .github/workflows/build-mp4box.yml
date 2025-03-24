@@ -1,0 +1,41 @@
+name: build
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: gpac/ubuntu-deps:latest
+
+    steps:
+      - name: Setup Node
+        shell: bash
+        run: |
+          apt-get update
+          apt-get install -y nodejs
+
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.ref }}
+          path: gpac_public
+
+      - name: Retrieve dependencies
+        shell: bash
+        run: cp -av /gpac-deps/gpac_public/extra_lib/* gpac_public/extra_lib/
+
+      - name: Build GPAC
+        working-directory: gpac_public
+        shell: bash
+        run: |
+          make distclean && ./configure --static-bin && make -j$(nproc)
+          mkdir -p /binaries
+          cp -vf bin/gcc/* /binaries/ || true
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.ref }}-binaries
+          path: /binaries/
